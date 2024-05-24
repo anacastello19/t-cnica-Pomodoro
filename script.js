@@ -1,14 +1,21 @@
+//Contastantes
 const html= document.querySelector('html');
 const botonCorto = document.querySelector('.app__card-button--corto');
 const botonEnfoque= document.querySelector('.app__card-button--enfoque');
 const botonLargo= document.querySelector('.app__card-button--largo');
+
 const banner= document.querySelector('.app__image');
 const title= document.querySelector('.app__title');
 const btn= document.querySelectorAll('.app__card-button');
 
-const inputMusicaEnfoque = document.querySelector('#alternar-musica');
-const musica = new Audio('./sonidos/luna-rise-part-one.mp3');
 const btnIniciarPausa= document.querySelector('#start-pause');
+const inputMusicaEnfoque = document.querySelector('#alternar-musica');
+
+const textoIniciarPausar = document.querySelector('#start-pause span');
+const iconoIniciarPausar = document.querySelector(".app__card-primary-butto-icon");
+const tiempoEnPantalla = document.querySelector('#timer');
+
+const musica = new Audio('./sonidos/luna-rise-part-one.mp3');
 const playMusic= new Audio('./sonidos/play.wav');
 const pauseMusic= new Audio('./sonidos/pause.mp3');
 const avisoMusic=new Audio('./sonidos/beep.mp3');
@@ -28,6 +35,7 @@ inputMusicaEnfoque.addEventListener('change', () => {
 });
 
 botonCorto.addEventListener('click',()=>{
+    tiempoSeg=300;
     cambiarContexto('descanso-corto');
     botonCorto.classList.add('active')
     // html.setAttribute('data-contexto','descanso-corto')
@@ -35,6 +43,7 @@ botonCorto.addEventListener('click',()=>{
 });
 
 botonEnfoque.addEventListener('click',()=>{
+    tiempoSeg=1500;
     cambiarContexto('enfoque');
     botonEnfoque.classList.add('active')
     // html.setAttribute('data-contexto','enfoque')
@@ -44,6 +53,7 @@ botonEnfoque.addEventListener('click',()=>{
 // Para hacer que el boton largo cambie de color con el click creamos la siq function
 //Cuando se haga click el metodo addEventListener ejecutara la funcion
 botonLargo.addEventListener('click',()=>{
+    tiempoSeg=900;
     cambiarContexto('descanso-largo');
     botonLargo.classList.add('active')
     // Método setAttribute() se utiliza para establecer o cambiar el valor de un atributo de un elemento del DOM.
@@ -61,6 +71,7 @@ botonLargo.addEventListener('click',()=>{
 
 // En las sig lineas de codigo haremos lo mismo que hace la const BANNER pero resumido en un function
 function cambiarContexto(contexto){
+    mostrarTiempo()
     btn.forEach(function(contexto){
         contexto.classList.remove('active')
     })
@@ -91,16 +102,20 @@ function cambiarContexto(contexto){
 }
 
 const cuentaRegresiva= ()=>{
-    if(tiempoSeg<=0){
+    if(tiempoSeg <= 0){
+        avisoMusic.play();
+        reiniciar()
         return
     }
+    textoIniciarPausar.textContent="Pausar"
+    iconoIniciarPausar.setAttribute('src', `/imagenes/pause.png`);
     tiempoSeg-=1;
-    console.log('Temporizador'+tiempoSeg);
+    mostrarTiempo()
 }
 
-btnIniciarPausa.addEventListener('click', iniciarOPausar);
+btnIniciarPausa.addEventListener('click', iniciarPausar);
 
-function iniciarOPausar(){
+function iniciarPausar(){
     if(idIntervalo){
     //     inputMusicaEnfoque.addEventListener('change', () => {
     //         if(playMusic.paused) {
@@ -109,13 +124,26 @@ function iniciarOPausar(){
     //             playMusic.pause();
     //     }
     //     })
+    pauseMusic.play();
     reiniciar()
     return
     }
+    playMusic.play();
     idIntervalo=setInterval(cuentaRegresiva, 1000)//1000= 1seg
 }
 
 function reiniciar(){
     clearInterval(idIntervalo)
+    textoIniciarPausar.textContent="Comenzar";
+    //Cambiamos la imagen 
+    iconoIniciarPausar.setAttribute('src',`/imagenes/play_arrow.png`);
     idIntervalo=null
 }
+
+function mostrarTiempo(){
+    const tiempo= new Date(tiempoSeg*1000);
+    const tiempoFormateado= tiempo.toLocaleTimeString('es-MX',{minute:'2-digit', second:'2-digit'})
+    tiempoEnPantalla.innerHTML=`${tiempoFormateado}`
+}
+
+mostrarTiempo()
